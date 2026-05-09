@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kinophile Project — قيّم عالمك</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#07090f;--surface:#0d1120;--surface2:#131929;--surface3:#1a2235;
+  --gold:#f5c842;--gold2:#c9961a;--red:#e63946;--blue:#3a9df8;--green:#4ade80;--purple:#a78bfa;
+  --text:#e8edf5;--muted:#6b7a99;--border:rgba(255,255,255,0.07);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 50% at 15% 5%,rgba(245,200,66,0.07) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 85%,rgba(58,157,248,0.06) 0%,transparent 60%);}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(7,9,15,0.92);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);padding:0 1rem;display:flex;align-items:center;gap:0.6rem;height:60px;}
+@media(max-width:600px){.nav-tabs{display:none!important;}.search-input{width:110px!important;}.auth-btn{padding:0.35rem 0.6rem!important;font-size:0.75rem!important;}}
+.logo{font-family:'Bebas Neue',cursive;font-size:1.7rem;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--gold),#fffbe0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex-shrink:0;cursor:pointer;}
+.nav-tabs{display:flex;gap:2px;flex:1;justify-content:center;flex-wrap:wrap;overflow-x:auto;}
+.nav-tab{background:none;border:none;color:var(--muted);font-family:'Cairo',sans-serif;font-size:0.85rem;font-weight:600;
+  padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:0.3rem;}
+.nav-tab:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+.nav-tab.active{color:var(--gold);background:rgba(245,200,66,0.1);}
+.search-wrap{position:relative;flex-shrink:0;}
+.search-input{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:0.42rem 0.9rem 0.42rem 2rem;color:var(--text);font-family:'Cairo',sans-serif;
+  font-size:0.83rem;width:200px;outline:none;transition:all 0.2s;}
+.search-input:focus{border-color:rgba(245,200,66,0.4);width:240px;}
+.search-icon{position:absolute;left:0.6rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.8rem;pointer-events:none;}
+
+/* AUTH */
+.auth-btn{display:flex;align-items:center;gap:0.4rem;background:var(--surface);border:1px solid var(--border);
+  color:var(--text);font-family:'Cairo',sans-serif;font-size:0.8rem;font-weight:600;
+  padding:0.4rem 0.9rem;border-radius:9px;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
+.auth-btn:hover{border-color:rgba(245,200,66,0.3);color:var(--gold);}
+.auth-btn img{width:16px;height:16px;border-radius:50%;}
+.user-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);cursor:pointer;}
+.user-initial{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#1a0f00;font-weight:700;font-size:0.8rem;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;border:2px solid var(--gold);}
+.auth-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.88);
+  backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:1rem;}
+.auth-overlay.open{display:flex;}
+.auth-modal{background:var(--surface);border:1px solid rgba(245,200,66,0.2);border-radius:20px;
+  padding:2rem;width:100%;max-width:360px;text-align:center;
+  animation:popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;}
+.auth-logo{font-family:'Bebas Neue',cursive;font-size:2.5rem;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--gold),#fffbe0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.3rem;}
+.auth-sub{color:var(--muted);font-size:0.85rem;margin-bottom:1.8rem;}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:0.7rem;
+  width:100%;background:white;color:#333;border:none;border-radius:12px;
+  padding:0.8rem;font-family:'Cairo',sans-serif;font-size:0.92rem;font-weight:700;
+  cursor:pointer;transition:all 0.2s;margin-bottom:0.8rem;}
+.google-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,255,255,0.15);}
+.google-btn svg{width:20px;height:20px;flex-shrink:0;}
+.auth-divider{color:var(--muted);font-size:0.75rem;margin:0.5rem 0;}
+.skip-btn{background:none;border:1px solid var(--border);color:var(--muted);
+  font-family:'Cairo',sans-serif;font-size:0.82rem;width:100%;padding:0.65rem;
+  border-radius:10px;cursor:pointer;transition:all 0.2s;}
+.skip-btn:hover{color:var(--text);}
+.user-menu{position:absolute;top:55px;left:1rem;background:var(--surface);
+  border:1px solid var(--border);border-radius:12px;padding:0.5rem;
+  min-width:180px;z-index:200;box-shadow:0 10px 40px rgba(0,0,0,0.5);
+  animation:fadeDown 0.2s ease both;}
+.user-menu-item{display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.8rem;
+  border-radius:8px;cursor:pointer;font-size:0.82rem;transition:background 0.15s;}
+.user-menu-item:hover{background:var(--surface2);}
+.user-menu-item.danger{color:var(--red);}
+.user-name{font-size:0.78rem;color:var(--muted);padding:0.4rem 0.8rem 0.2rem;}
+
+/* HERO */
+.hero{position:relative;z-index:1;padding:3.5rem 1.5rem 2rem;text-align:center;}
+.hero-tag{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(245,200,66,0.08);
+  border:1px solid rgba(245,200,66,0.25);color:var(--gold);font-size:0.72rem;font-weight:700;
+  padding:0.28rem 0.9rem;border-radius:20px;margin-bottom:1rem;letter-spacing:1px;animation:fadeDown 0.5s ease both;}
+.hero h1{font-size:clamp(1.8rem,4.5vw,3.5rem);font-weight:900;line-height:1.1;margin-bottom:0.7rem;animation:fadeDown 0.5s 0.1s ease both;}
+.hero h1 em{font-style:normal;color:var(--gold);}
+.hero p{color:var(--muted);font-size:0.95rem;max-width:380px;margin:0 auto 1.8rem;animation:fadeDown 0.5s 0.15s ease both;}
+.stats-bar{display:flex;justify-content:center;gap:2rem;animation:fadeDown 0.5s 0.2s ease both;}
+.stat .n{font-size:1.5rem;font-weight:900;color:var(--gold);}
+.stat .l{font-size:0.7rem;color:var(--muted);}
+
+/* MAIN */
+.main{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:1.2rem 1.5rem 3rem;}
+.layout{display:grid;grid-template-columns:1fr 320px;gap:1.5rem;}
+@media(max-width:920px){.layout{grid-template-columns:1fr;}}
+
+/* SEC HEAD */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;}
+.sec-title{font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;}
+.sec-title .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);}
+.sec-actions{display:flex;gap:0.4rem;flex-wrap:wrap;}
+
+/* BTN */
+.btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Cairo',sans-serif;
+  font-size:0.78rem;padding:0.35rem 0.8rem;border-radius:8px;cursor:pointer;transition:all 0.2s;}
+.btn:hover{color:var(--gold);border-color:rgba(245,200,66,0.3);}
+.btn.active{color:var(--gold);border-color:rgba(245,200,66,0.4);background:rgba(245,200,66,0.07);}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a0f00;border:none;
+  font-family:'Cairo',sans-serif;font-weight:700;font-size:0.83rem;padding:0.45rem 1.1rem;
+  border-radius:9px;cursor:pointer;transition:all 0.2s;}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(245,200,66,0.3);}
+
+/* CARDS */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:0.9rem;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;
+  cursor:pointer;transition:transform 0.25s,box-shadow 0.25s,border-color 0.25s;animation:fadeUp 0.4s ease both;}
+.card:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,0.6),0 0 0 1px rgba(245,200,66,0.12);border-color:rgba(245,200,66,0.18);}
+.card-img{position:relative;aspect-ratio:2/3;overflow:hidden;background:var(--surface2);}
+.card-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s;display:block;}
+.card:hover .card-img img{transform:scale(1.06);}
+.card-img .no-img{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3.2rem;
+  background:linear-gradient(135deg,var(--surface2),#1a2035);}
+.card-score{position:absolute;bottom:6px;left:6px;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border-radius:6px;padding:2px 6px;font-size:0.68rem;font-weight:700;color:#1a0f00;}
+.card-type-badge{position:absolute;top:6px;right:6px;background:rgba(7,9,15,0.82);backdrop-filter:blur(4px);
+  border-radius:5px;padding:2px 6px;font-size:0.62rem;color:var(--muted);}
+.card-list-badge{position:absolute;top:6px;left:6px;border-radius:5px;padding:2px 6px;font-size:0.6rem;font-weight:700;}
+.card-list-badge.watched{background:rgba(74,222,128,0.2);color:var(--green);}
+.card-list-badge.watching{background:rgba(58,157,248,0.2);color:var(--blue);}
+.card-list-badge.later{background:rgba(167,139,250,0.2);color:var(--purple);}
+.card-body{padding:0.65rem;}
+.card-title{font-size:0.82rem;font-weight:700;margin-bottom:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-sub{font-size:0.68rem;color:var(--muted);}
+.card-my{font-size:0.67rem;color:var(--gold);margin-top:2px;}
+
+/* LOADING / EMPTY */
+.loading{grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted);font-size:0.88rem;}
+.spinner{width:34px;height:34px;border:3px solid var(--surface2);border-top-color:var(--gold);
+  border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1rem;}
+.empty{grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted);}
+.empty .big{font-size:3rem;margin-bottom:0.5rem;}
+
+/* SIDEBAR */
+.sidebar-section{margin-bottom:1.5rem;}
+.side-title{font-size:0.85rem;font-weight:700;margin-bottom:0.7rem;display:flex;align-items:center;gap:0.4rem;}
+
+/* MY LIST ITEM */
+.list-item{display:flex;align-items:center;gap:0.7rem;background:var(--surface);border:1px solid var(--border);
+  border-radius:9px;padding:0.6rem 0.7rem;cursor:pointer;transition:all 0.2s;margin-bottom:0.55rem;}
+.list-item:hover{border-color:rgba(245,200,66,0.2);transform:translateX(-3px);}
+.list-rank{font-family:'Bebas Neue',cursive;font-size:1.3rem;width:1.6rem;text-align:center;flex-shrink:0;color:var(--border);}
+.list-rank.g{color:var(--gold);}.list-rank.s{color:#b0b8c8;}.list-rank.b{color:#cd8b4a;}
+.list-thumb{width:34px;height:48px;border-radius:5px;overflow:hidden;flex-shrink:0;background:var(--surface2);}
+.list-thumb img{width:100%;height:100%;object-fit:cover;}
+.list-thumb .te{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.list-info{flex:1;min-width:0;}
+.list-name{font-weight:700;font-size:0.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.list-sub{font-size:0.67rem;color:var(--muted);margin-top:1px;}
+.list-score{text-align:left;flex-shrink:0;}
+.list-sc{font-size:1rem;font-weight:700;color:var(--gold);}
+.list-vc{font-size:0.62rem;color:var(--muted);}
+
+/* STATS CARDS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:1.2rem;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.8rem;text-align:center;}
+.stat-card .sn{font-size:1.4rem;font-weight:900;color:var(--gold);}
+.stat-card .sl{font-size:0.68rem;color:var(--muted);margin-top:2px;}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.88);
+  backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:1rem;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid rgba(245,200,66,0.15);border-radius:18px;
+  padding:1.6rem;width:100%;max-width:460px;position:relative;
+  animation:popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;max-height:92vh;overflow-y:auto;}
+.modal-close{position:absolute;top:0.9rem;left:0.9rem;background:none;border:none;color:var(--muted);
+  font-size:1.1rem;cursor:pointer;padding:0.2rem 0.4rem;border-radius:6px;transition:color 0.2s;}
+.modal-close:hover{color:var(--red);}
+.modal-top{display:flex;gap:0.9rem;margin-bottom:1.2rem;}
+.modal-poster{width:80px;height:118px;border-radius:9px;overflow:hidden;flex-shrink:0;background:var(--surface2);}
+.modal-poster img{width:100%;height:100%;object-fit:cover;}
+.modal-poster .mpe{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;}
+.modal-title{font-size:1.1rem;font-weight:700;margin-bottom:0.25rem;line-height:1.2;}
+.modal-meta{font-size:0.75rem;color:var(--muted);line-height:1.5;}
+.modal-overview{font-size:0.75rem;color:var(--muted);line-height:1.6;margin-top:0.35rem;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+
+/* LIST SELECTOR */
+.list-selector{display:flex;gap:0.4rem;margin-bottom:1rem;flex-wrap:wrap;}
+.list-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:0.38rem 0.8rem;font-family:'Cairo',sans-serif;font-size:0.75rem;color:var(--muted);cursor:pointer;transition:all 0.2s;}
+.list-btn:hover{color:var(--text);}
+.list-btn.sel-watched{background:rgba(74,222,128,0.15);border-color:rgba(74,222,128,0.4);color:var(--green);}
+.list-btn.sel-watching{background:rgba(58,157,248,0.15);border-color:rgba(58,157,248,0.4);color:var(--blue);}
+.list-btn.sel-later{background:rgba(167,139,250,0.15);border-color:rgba(167,139,250,0.4);color:var(--purple);}
+
+/* COMMUNITY RATING */
+.community-rating{display:flex;align-items:center;gap:0.6rem;background:var(--surface2);
+  border-radius:9px;padding:0.6rem 0.9rem;margin-bottom:1rem;}
+.cr-label{font-size:0.75rem;color:var(--muted);flex:1;}
+.cr-score{font-size:1.3rem;font-weight:900;color:var(--gold);}
+.cr-count{font-size:0.65rem;color:var(--muted);}
+
+/* STARS */
+.rate-label{font-size:0.82rem;font-weight:700;margin-bottom:0.5rem;}
+.stars-row{display:flex;gap:0.25rem;margin-bottom:0.3rem;}
+.star{background:none;border:none;cursor:pointer;font-size:1.9rem;color:#1e2535;
+  filter:drop-shadow(0 0 0 transparent);transition:transform 0.15s,color 0.15s;}
+.star.on{color:var(--gold);filter:drop-shadow(0 0 4px rgba(245,200,66,0.5));}
+.star:hover{transform:scale(1.2);}
+.star-hint{font-size:0.78rem;color:var(--muted);margin-bottom:0.8rem;min-height:1.1em;}
+
+textarea,input.field{width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:9px;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.82rem;
+  padding:0.68rem 0.8rem;outline:none;transition:border-color 0.2s;}
+textarea:focus,input.field:focus{border-color:rgba(245,200,66,0.35);}
+textarea{resize:none;height:70px;}
+select.field{width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:9px;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.82rem;
+  padding:0.68rem 0.8rem;outline:none;}
+
+.modal-actions{display:flex;gap:0.5rem;margin-top:0.8rem;}
+.btn-cancel2{flex:1;background:none;border:1px solid var(--border);color:var(--muted);
+  font-family:'Cairo',sans-serif;font-size:0.82rem;border-radius:9px;padding:0.58rem;cursor:pointer;transition:all 0.2s;}
+.btn-cancel2:hover{border-color:var(--red);color:var(--red);}
+.btn-submit{flex:2;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a0f00;
+  border:none;border-radius:9px;padding:0.58rem;font-family:'Cairo',sans-serif;
+  font-weight:700;font-size:0.85rem;cursor:pointer;transition:all 0.2s;}
+.btn-submit:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(245,200,66,0.3);}
+.btn-delete{background:rgba(230,57,70,0.12);border:1px solid rgba(230,57,70,0.25);color:var(--red);
+  font-family:'Cairo',sans-serif;font-size:0.75rem;border-radius:8px;padding:0.4rem 0.7rem;cursor:pointer;transition:all 0.2s;}
+.btn-delete:hover{background:rgba(230,57,70,0.2);}
+
+/* ADD MODAL */
+.add-form{display:flex;flex-direction:column;gap:0.7rem;}
+.form-row{display:flex;gap:0.6rem;}
+.form-row .field,.form-row select.field{flex:1;}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);
+  background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a0f00;font-weight:700;
+  font-size:0.85rem;padding:0.7rem 1.5rem;border-radius:30px;
+  box-shadow:0 8px 30px rgba(245,200,66,0.35);z-index:500;
+  transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* LOAD MORE */
+#loadMoreBtn{display:none;margin:1.2rem auto 0;padding:0.6rem 2rem;}
+
+/* ANIMATIONS */
+@keyframes fadeDown{from{opacity:0;transform:translateY(-15px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
+@keyframes popIn{from{opacity:0;transform:scale(0.88);}to{opacity:1;transform:scale(1);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+.card:nth-child(1){animation-delay:.04s}.card:nth-child(2){animation-delay:.08s}
+.card:nth-child(3){animation-delay:.12s}.card:nth-child(4){animation-delay:.16s}
+.card:nth-child(5){animation-delay:.20s}.card:nth-child(6){animation-delay:.24s}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:3px;}
+.divider{height:1px;background:var(--border);margin:0.8rem 0;}
+/* AUTH */
+.auth-btn{display:flex;align-items:center;gap:0.4rem;background:var(--surface);border:1px solid var(--border);
+  color:var(--text);font-family:'Cairo',sans-serif;font-size:0.8rem;font-weight:600;
+  padding:0.4rem 0.9rem;border-radius:9px;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
+.auth-btn:hover{border-color:rgba(245,200,66,0.3);color:var(--gold);}
+.user-initial{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#1a0f00;font-weight:700;font-size:0.82rem;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;border:2px solid var(--gold);}
+.auth-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.88);
+  backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:1rem;}
+.auth-overlay.open{display:flex;}
+.auth-modal{background:var(--surface);border:1px solid rgba(245,200,66,0.2);border-radius:20px;
+  padding:2rem;width:100%;max-width:340px;text-align:center;
+  animation:popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;}
+.auth-logo{font-family:'Bebas Neue',cursive;font-size:2.5rem;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--gold),#fffbe0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.3rem;}
+.auth-sub{color:var(--muted);font-size:0.83rem;margin-bottom:1.8rem;line-height:1.6;}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:0.7rem;
+  width:100%;background:white;color:#333;border:none;border-radius:12px;
+  padding:0.8rem;font-family:'Cairo',sans-serif;font-size:0.9rem;font-weight:700;
+  cursor:pointer;transition:all 0.2s;margin-bottom:0.8rem;}
+.google-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,255,255,0.15);}
+.auth-divider{color:var(--muted);font-size:0.75rem;margin:0.5rem 0;}
+.skip-btn{background:none;border:1px solid var(--border);color:var(--muted);
+  font-family:'Cairo',sans-serif;font-size:0.82rem;width:100%;padding:0.65rem;
+  border-radius:10px;cursor:pointer;transition:all 0.2s;}
+.skip-btn:hover{color:var(--text);}
+.user-menu-wrap{position:relative;flex-shrink:0;}
+.user-menu{position:absolute;top:40px;left:0;background:var(--surface);
+  border:1px solid var(--border);border-radius:12px;padding:0.5rem;
+  min-width:180px;z-index:200;box-shadow:0 10px 40px rgba(0,0,0,0.5);
+  animation:fadeDown 0.2s ease both;}
+.user-menu-name{font-size:0.75rem;color:var(--muted);padding:0.3rem 0.8rem 0.5rem;}
+.user-menu-item{display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0.8rem;
+  border-radius:8px;cursor:pointer;font-size:0.82rem;transition:background 0.15s;}
+.user-menu-item:hover{background:var(--surface2);}
+.user-menu-item.danger{color:var(--red);}
+
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo" onclick="setTab('movie', document.querySelector('.nav-tab'))">Kinophile Project</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="setTab('movie',this)">🎬 أفلام</button>
+    <button class="nav-tab" onclick="setTab('tv',this)">📺 مسلسلات</button>
+    <button class="nav-tab" onclick="setTab('game',this)">🎮 ألعاب</button>
+    <button class="nav-tab" onclick="showMyList()">📋 قائمتي</button>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="searchInput" placeholder="ابحث..." oninput="handleSearch(this.value)">
+  </div>
+  <div id="authArea" style="flex-shrink:0;">
+    <button class="auth-btn" id="loginBtn" onclick="openAuth()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      دخول
+    </button>
+  </div>
+</nav>
+
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-modal">
+    <div class="auth-logo">Kinophile Project</div>
+    <div class="auth-sub">سجّل دخولك لحفظ تقييماتك على جميع أجهزتك</div>
+    <button class="google-btn" onclick="loginWithGoogle()">
+      <svg viewBox="0 0 24 24" width="20" height="20" style="flex-shrink:0"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      تسجيل الدخول بـ Google
+    </button>
+    <div class="auth-divider">أو</div>
+    <button class="skip-btn" onclick="closeAuth()">تصفح بدون تسجيل</button>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-tag">✨ Kinophile Project — منصة التقييم</div>
+  <h1>قيّم <em>عالمك</em><br>الترفيهي</h1>
+  <p>أفلام، مسلسلات، وألعاب — تقييمات حقيقية يشوفها الجميع</p>
+  <div class="stats-bar">
+    <div class="stat"><div class="n" id="statTotal">0</div><div class="l">تقييم عام</div></div>
+    <div class="stat"><div class="n" id="statMine">0</div><div class="l">تقييماتي</div></div>
+    <div class="stat"><div class="n" id="statList">0</div><div class="l">في قائمتي</div></div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="layout">
+
+    <!-- LEFT -->
+    <div>
+      <div class="sec-head">
+        <div class="sec-title"><div class="dot"></div><span id="secLabel">الأفلام الشائعة</span></div>
+        <div class="sec-actions">
+          <button class="btn active" id="btnTrending" onclick="switchMode('trending')">🔥 شائع</button>
+          <button class="btn" id="btnTop" onclick="switchMode('top')">⭐ أعلى تقييم</button>
+          <button class="btn-gold" onclick="openAddModal()">+ أضف</button>
+        </div>
+      </div>
+      <div class="cards-grid" id="cardsGrid">
+        <div class="loading"><div class="spinner"></div>جاري التحميل...</div>
+      </div>
+      <div style="text-align:center;">
+        <button class="btn" id="loadMoreBtn" onclick="loadMore()">تحميل المزيد ↓</button>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div>
+      <!-- STATS -->
+      <div class="sidebar-section">
+        <div class="side-title"><span>📊</span> إحصائياتي</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="sn" id="sWatched">0</div><div class="sl">✅ شاهدت</div></div>
+          <div class="stat-card"><div class="sn" id="sWatching">0</div><div class="sl">▶️ أشاهد</div></div>
+          <div class="stat-card"><div class="sn" id="sLater">0</div><div class="sl">🔖 لاحقاً</div></div>
+          <div class="stat-card"><div class="sn" id="sAvg">—</div><div class="sl">⭐ متوسطي</div></div>
+        </div>
+      </div>
+
+      <!-- TOP RATED BY COMMUNITY -->
+      <div class="sidebar-section">
+        <div class="side-title"><span>🏆</span> الأعلى تقييماً (المجتمع)</div>
+        <div id="communityTop"></div>
+      </div>
+
+      <!-- MY RATINGS -->
+      <div class="sidebar-section">
+        <div class="side-title"><span>⭐</span> أعلى تقييماتي</div>
+        <div id="myRatingsList"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- RATE MODAL -->
+<div class="overlay" id="rateOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeRate()">✕</button>
+    <div class="modal-top">
+      <div class="modal-poster" id="mPoster"></div>
+      <div style="flex:1;min-width:0;">
+        <div class="modal-title" id="mTitle">—</div>
+        <div class="modal-meta" id="mMeta">—</div>
+        <div class="modal-overview" id="mOverview"></div>
+      </div>
+    </div>
+
+    <!-- LIST selector -->
+    <div style="font-size:0.8rem;font-weight:700;margin-bottom:0.5rem;">📋 أضف لقائمتك</div>
+    <div class="list-selector">
+      <button class="list-btn" id="lbWatched" onclick="toggleList('watched')">✅ شاهدت</button>
+      <button class="list-btn" id="lbWatching" onclick="toggleList('watching')">▶️ أشاهد</button>
+      <button class="list-btn" id="lbLater" onclick="toggleList('later')">🔖 لاحقاً</button>
+      <button class="list-btn" id="lbNone" onclick="toggleList('none')" style="font-size:0.7rem;">✕ إزالة</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Community rating -->
+    <div class="community-rating" id="communityRating" style="display:none;">
+      <div class="cr-label">📊 تقييم المجتمع</div>
+      <div style="text-align:left;">
+        <div class="cr-score" id="crScore">—</div>
+        <div class="cr-count" id="crCount"></div>
+      </div>
+    </div>
+
+    <!-- My rating -->
+    <div class="rate-label">⭐ تقييمك الشخصي</div>
+    <div class="stars-row" id="starsRow">
+      <button class="star" data-v="5" onclick="setStar(5)">★</button>
+      <button class="star" data-v="4" onclick="setStar(4)">★</button>
+      <button class="star" data-v="3" onclick="setStar(3)">★</button>
+      <button class="star" data-v="2" onclick="setStar(2)">★</button>
+      <button class="star" data-v="1" onclick="setStar(1)">★</button>
+    </div>
+    <div class="star-hint" id="starHint">اختر نجومك</div>
+    <textarea id="reviewText" placeholder="أضف مراجعتك (اختياري)..."></textarea>
+
+    <div class="modal-actions">
+      <button class="btn-delete" id="btnDelete" onclick="deleteRating()" style="display:none;">🗑️ حذف</button>
+      <button class="btn-cancel2" onclick="closeRate()">إلغاء</button>
+      <button class="btn-submit" onclick="submitRating()">حفظ ✅</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="overlay" id="addOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAdd()">✕</button>
+    <div class="modal-title" style="margin-bottom:1.2rem;">➕ أضف عملاً يدوياً</div>
+    <div class="add-form">
+      <input class="field" id="addName" placeholder="اسم العمل...">
+      <div class="form-row">
+        <select class="field" id="addType">
+          <option value="movie">🎬 فيلم</option>
+          <option value="tv">📺 مسلسل</option>
+          <option value="game">🎮 لعبة</option>
+        </select>
+        <input class="field" id="addYear" type="number" placeholder="السنة" value="2025" style="width:90px;flex:none;">
+      </div>
+      <input class="field" id="addEmoji" placeholder="إيموجي الغلاف (مثال: 🦁)">
+      <textarea id="addOverview" placeholder="وصف مختصر (اختياري)..." style="height:60px;"></textarea>
+    </div>
+    <div class="modal-actions" style="margin-top:1rem;">
+      <button class="btn-cancel2" onclick="closeAdd()">إلغاء</button>
+      <button class="btn-submit" onclick="submitAdd()">إضافة ✨</button>
+    </div>
+  </div>
+</div>
+
+<!-- MY LIST MODAL -->
+<div class="overlay" id="listOverlay">
+  <div class="modal" style="max-width:520px;">
+    <button class="modal-close" onclick="closeListView()">✕</button>
+    <div class="modal-title" style="margin-bottom:1rem;">📋 قائمتي الكاملة</div>
+    <div style="display:flex;gap:0.4rem;margin-bottom:1rem;flex-wrap:wrap;">
+      <button class="btn active" id="flAll" onclick="filterMyList('all',this)">الكل</button>
+      <button class="btn" id="flWatched" onclick="filterMyList('watched',this)">✅ شاهدت</button>
+      <button class="btn" id="flWatching" onclick="filterMyList('watching',this)">▶️ أشاهد</button>
+      <button class="btn" id="flLater" onclick="filterMyList('later',this)">🔖 لاحقاً</button>
+    </div>
+    <div id="myListContent" style="max-height:60vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- MOBILE BOTTOM NAV -->
+<div style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(7,9,15,0.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:0.5rem 0;" id="mobileNav">
+  <div style="display:flex;justify-content:space-around;">
+    <button onclick="setTab('movie',this)" style="background:none;border:none;color:var(--muted);font-family:'Cairo',sans-serif;font-size:0.7rem;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:0.3rem 1rem;" class="mob-tab active-mob">
+      <span style="font-size:1.3rem;">🎬</span>أفلام
+    </button>
+    <button onclick="setTab('tv',this)" style="background:none;border:none;color:var(--muted);font-family:'Cairo',sans-serif;font-size:0.7rem;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:0.3rem 1rem;" class="mob-tab">
+      <span style="font-size:1.3rem;">📺</span>مسلسلات
+    </button>
+    <button onclick="setTab('game',this)" style="background:none;border:none;color:var(--muted);font-family:'Cairo',sans-serif;font-size:0.7rem;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:0.3rem 1rem;" class="mob-tab">
+      <span style="font-size:1.3rem;">🎮</span>ألعاب
+    </button>
+    <button onclick="showMyList()" style="background:none;border:none;color:var(--muted);font-family:'Cairo',sans-serif;font-size:0.7rem;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:0.3rem 1rem;">
+      <span style="font-size:1.3rem;">📋</span>قائمتي
+    </button>
+    <div id="mobAuthBtn" onclick="handleMobAuth()" style="background:none;border:none;color:var(--muted);font-family:'Cairo',sans-serif;font-size:0.7rem;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:0.3rem 1rem;">
+      <span style="font-size:1.3rem;">👤</span><span id="mobAuthLabel">دخول</span>
+    </div>
+  </div>
+</div>
+<style>
+@media(max-width:600px){
+  #mobileNav{display:block!important;}
+  body{padding-bottom:70px;}
+  .layout{grid-template-columns:1fr!important;}
+}
+</style>
+
+<script>
+// ── CONFIG ──
+const SUPA_URL = 'https://esonhowgpbimrqsrtejs.supabase.co';
+const SUPA_KEY = 'sb_publishable_QrBvtH8-U20Or6sMTN9tlA_';
+const TMDB_KEY = '9205aa8d686e30430e28914f9e5e1f80';
+const RAWG_KEY = 'fc9c41c0b0104282a16cf96e52f342d9';
+const TMDB    = 'https://api.themoviedb.org/3';
+const IMG     = 'https://image.tmdb.org/t/p/w342';
+
+// ── SUPABASE ──
+const { createClient } = supabase;
+const db = createClient(SUPA_URL, SUPA_KEY, {
+  auth: {
+    flowType: 'pkce',
+    detectSessionInUrl: true,
+    persistSession: true,
+    autoRefreshToken: true,
+  }
+});
+
+// Device ID (anonymous user identifier)
+let deviceId = localStorage.getItem('kino_device');
+if(!deviceId){ deviceId = 'u_'+Math.random().toString(36).slice(2)+Date.now(); localStorage.setItem('kino_device',deviceId); }
+
+// ── STATE ──
+let currentTab = 'movie';
+let currentMode = 'trending';
+let currentItems = [];
+let currentPage = 1;
+let currentSearch = '';
+let searchTimer = null;
+let selectedStar = 0;
+let selectedList = null;
+let currentItem = null;
+let myRatings = {}; // key -> {stars, review, list, title, type, poster}
+let communityRatings = {}; // key -> {avg, count}
+let myListFilter = 'all';
+
+const hints = ['','👎 سيء','😑 مقبول','🙂 جيد','😍 رائع','🔥 ممتاز جداً'];
+const typeLabel = {movie:'فيلم', tv:'مسلسل', game:'لعبة'};
+const listColors = {watched:'sel-watched', watching:'sel-watching', later:'sel-later'};
+
+// ── INIT SUPABASE TABLES ──
+async function initDB(){
+  // Create tables if not exist via RPC or just try insert and handle
+  // Tables: ratings (device_id, item_key, stars, review, list_status, title, type, poster, created_at)
+  // We'll just use upsert and handle errors gracefully
+  await loadMyRatings();
+  await loadCommunityRatings();
+  loadTrending();
+}
+
+// ── LOAD MY RATINGS ──
+async function loadMyRatings(){
+  try{
+    const {data} = await db.from('ratings').select('*').eq('device_id', deviceId);
+    myRatings = {};
+    (data||[]).forEach(r=>{ myRatings[r.item_key] = r; });
+    updateSidebar();
+    updateHeroStats();
+  }catch(e){ console.log('DB not ready yet:', e.message); }
+}
+
+// ── LOAD COMMUNITY RATINGS ──
+async function loadCommunityRatings(){
+  try{
+    const {data} = await db.from('ratings').select('item_key, stars');
+    communityRatings = {};
+    (data||[]).forEach(r=>{
+      if(!communityRatings[r.item_key]) communityRatings[r.item_key]={sum:0,count:0};
+      communityRatings[r.item_key].sum += r.stars;
+      communityRatings[r.item_key].count++;
+    });
+    Object.keys(communityRatings).forEach(k=>{
+      const c = communityRatings[k];
+      c.avg = (c.sum/c.count).toFixed(1);
+    });
+    renderCommunityTop();
+  }catch(e){}
+}
+
+// ── TABS ──
+function setTab(tab, el){
+  currentTab = tab;
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  currentPage=1; currentItems=[]; currentSearch='';
+  document.getElementById('searchInput').value='';
+  document.getElementById('listOverlay').classList.remove('open');
+  switchMode(currentMode, true);
+}
+
+function switchMode(mode, force=false){
+  if(currentMode===mode && !force) return;
+  currentMode = mode;
+  currentPage=1; currentItems=[];
+  document.getElementById('btnTrending').classList.toggle('active', mode==='trending');
+  document.getElementById('btnTop').classList.toggle('active', mode==='top');
+  if(currentSearch) doSearch();
+  else if(mode==='top') loadTopRated();
+  else loadTrending();
+}
+
+// ── FETCH ──
+async function fetchTMDB(path, params={}){
+  const q = new URLSearchParams({api_key:TMDB_KEY, language:'ar', ...params});
+  const r = await fetch(`${TMDB}${path}?${q}`);
+  if(!r.ok) throw new Error('TMDB error');
+  return r.json();
+}
+async function fetchRAWG(path, params={}){
+  const q = new URLSearchParams({key:RAWG_KEY, ...params});
+  const r = await fetch(`https://api.rawg.io/api${path}?${q}`);
+  if(!r.ok) throw new Error('RAWG error');
+  return r.json();
+}
+
+function normalizeGame(g){
+  return { id:g.id, title:g.name, name:g.name, media_type:'game',
+    poster_path:null, background_image:g.background_image,
+    vote_average:g.rating||0, vote_count:g.ratings_count||0,
+    release_date:g.released||'', overview:g.genres?g.genres.map(x=>x.name).join(', '):'', };
+}
+
+function getKey(item){ return `${item.media_type||currentTab}_${item.id}`; }
+function getImg(item){
+  if(item.poster_path) return IMG+item.poster_path;
+  if(item.background_image) return item.background_image;
+  return null;
+}
+
+// ── LOAD ──
+async function loadTrending(){
+  showLoading();
+  try{
+    if(currentTab==='game'){
+      const d = await fetchRAWG('/games',{page_size:20,ordering:'-added'});
+      currentItems = (d.results||[]).map(normalizeGame);
+    } else {
+      const d = await fetchTMDB(`/trending/${currentTab}/week`);
+      currentItems = (d.results||[]).map(i=>({...i,media_type:currentTab}));
+    }
+    const lbl={movie:'🔥 الأفلام الشائعة',tv:'🔥 المسلسلات الشائعة',game:'🔥 الألعاب الشائعة'};
+    document.getElementById('secLabel').textContent=lbl[currentTab];
+    renderCards();
+  }catch(e){ showError(); }
+}
+
+async function loadTopRated(){
+  showLoading();
+  try{
+    if(currentTab==='game'){
+      const d = await fetchRAWG('/games',{page_size:20,ordering:'-rating'});
+      currentItems = (d.results||[]).map(normalizeGame);
+    } else {
+      const d = await fetchTMDB(`/${currentTab}/top_rated`);
+      currentItems = (d.results||[]).map(i=>({...i,media_type:currentTab}));
+    }
+    const lbl={movie:'⭐ أعلى الأفلام تقييماً',tv:'⭐ أعلى المسلسلات تقييماً',game:'⭐ أعلى الألعاب تقييماً'};
+    document.getElementById('secLabel').textContent=lbl[currentTab];
+    renderCards();
+  }catch(e){ showError(); }
+}
+
+async function loadMore(){
+  currentPage++;
+  try{
+    if(currentTab==='game'){
+      const ord = currentMode==='top'?'-rating':'-added';
+      const params = currentSearch?{search:currentSearch,page:currentPage,page_size:20}:{page:currentPage,page_size:20,ordering:ord};
+      const d = await fetchRAWG('/games',params);
+      currentItems=[...currentItems,...(d.results||[]).map(normalizeGame)];
+    } else {
+      let d;
+      if(currentSearch){
+        d = await fetchTMDB(`/search/${currentTab}`,{query:currentSearch,page:currentPage});
+      } else {
+        const ep = currentMode==='top'?`/${currentTab}/top_rated`:`/trending/${currentTab}/week`;
+        d = await fetchTMDB(ep,{page:currentPage});
+      }
+      currentItems=[...currentItems,...(d.results||[]).map(i=>({...i,media_type:currentTab}))];
+    }
+    renderCards(true);
+  }catch(e){}
+}
+
+// ── SEARCH ──
+function handleSearch(val){
+  clearTimeout(searchTimer);
+  currentSearch=val.trim();
+  if(!currentSearch){ currentMode==='top'?loadTopRated():loadTrending(); return; }
+  searchTimer=setTimeout(doSearch,500);
+}
+async function doSearch(){
+  currentPage=1; currentItems=[];
+  showLoading();
+  document.getElementById('secLabel').textContent=`🔍 "${currentSearch}"`;
+  try{
+    if(currentTab==='game'){
+      const d=await fetchRAWG('/games',{search:currentSearch,page_size:20});
+      currentItems=(d.results||[]).map(normalizeGame);
+    } else {
+      const d=await fetchTMDB(`/search/${currentTab}`,{query:currentSearch});
+      currentItems=(d.results||[]).map(i=>({...i,media_type:currentTab}));
+    }
+    renderCards();
+  }catch(e){ showError(); }
+}
+
+// ── RENDER CARDS ──
+function renderCards(append=false){
+  const grid=document.getElementById('cardsGrid');
+  if(!append) grid.innerHTML='';
+  if(!currentItems.length){
+    grid.innerHTML='<div class="empty"><div class="big">🔍</div>لا توجد نتائج</div>';
+    document.getElementById('loadMoreBtn').style.display='none'; return;
+  }
+  const html=currentItems.map(item=>{
+    const key=getKey(item);
+    const r=myRatings[key];
+    const title=item.title||item.name||'—';
+    const year=(item.release_date||item.first_air_date||item.released||'').slice(0,4);
+    const score=item.vote_average?(item.vote_average.toFixed(1)):'';
+    const imgSrc=getImg(item);
+    const commR=communityRatings[key];
+    const listStatus=r?.list_status;
+    return `
+    <div class="card" onclick="openRate('${key}')">
+      <div class="card-img">
+        ${imgSrc?`<img src="${imgSrc}" alt="${title}" loading="lazy">`:`<div class="no-img">${item.media_type==='game'?'🎮':item.media_type==='tv'?'📺':'🎬'}</div>`}
+        ${commR?`<div class="card-score">★ ${commR.avg}</div>`:score?`<div class="card-score">★ ${score}</div>`:''}
+        <div class="card-type-badge">${typeLabel[item.media_type]||''}</div>
+        ${listStatus&&listStatus!=='none'?`<div class="card-list-badge ${listStatus}">${listStatus==='watched'?'✅':listStatus==='watching'?'▶️':'🔖'}</div>`:''}
+      </div>
+      <div class="card-body">
+        <div class="card-title">${title}</div>
+        <div class="card-sub">${year||'—'}</div>
+        ${r&&r.stars?`<div class="card-my">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  if(append) grid.innerHTML+=html; else grid.innerHTML=html;
+  document.getElementById('loadMoreBtn').style.display='block';
+}
+
+function showLoading(){ document.getElementById('cardsGrid').innerHTML='<div class="loading"><div class="spinner"></div>جاري التحميل...</div>'; document.getElementById('loadMoreBtn').style.display='none'; }
+function showError(){ document.getElementById('cardsGrid').innerHTML='<div class="empty"><div class="big">⚠️</div>حدث خطأ، تحقق من الاتصال</div>'; }
+
+// ── MODAL ──
+function openRate(key){
+  // find item
+  currentItem = currentItems.find(i=>getKey(i)===key);
+  if(!currentItem){
+    // might be a custom item from myRatings
+    const r = myRatings[key];
+    if(r){ currentItem = {id:key.split('_')[1], media_type:r.type, title:r.title, poster_path:null, background_image:r.poster, vote_average:0, overview:r.overview||'', release_date:r.year||''}; }
+    else return;
+  }
+
+  selectedStar=0; selectedList=null;
+  const existing = myRatings[key];
+
+  // poster
+  const imgSrc=getImg(currentItem);
+  const pEl=document.getElementById('mPoster');
+  pEl.innerHTML=imgSrc?`<img src="${imgSrc}" alt="">`:`<div class="mpe">${currentItem.media_type==='game'?'🎮':currentItem.media_type==='tv'?'📺':'🎬'}</div>`;
+
+  const title=currentItem.title||currentItem.name||'—';
+  const year=(currentItem.release_date||currentItem.first_air_date||currentItem.released||'').slice(0,4);
+  document.getElementById('mTitle').textContent=title;
+  document.getElementById('mMeta').textContent=`${typeLabel[currentItem.media_type]||''} • ${year}`;
+  document.getElementById('mOverview').textContent=currentItem.overview||'';
+
+  // community
+  const commR=communityRatings[key];
+  const va=currentItem.vote_average;
+  if(commR||va){
+    const avg=commR?commR.avg:(va?va.toFixed(1):'—');
+    const cnt=commR?`${commR.count} تقييم`:(currentItem.vote_count?`${currentItem.vote_count.toLocaleString()} (TMDB)`:'');
+    document.getElementById('crScore').textContent=`★ ${avg}`;
+    document.getElementById('crCount').textContent=cnt;
+    document.getElementById('communityRating').style.display='flex';
+  } else {
+    document.getElementById('communityRating').style.display='none';
+  }
+
+  // existing rating
+  document.getElementById('reviewText').value=existing?.review||'';
+  document.getElementById('btnDelete').style.display=existing?'block':'none';
+  if(existing?.stars) setStar(existing.stars); else { updateStars(0); document.getElementById('starHint').textContent='اختر نجومك'; }
+
+  // list status
+  selectedList=existing?.list_status||null;
+  updateListBtns();
+
+  document.getElementById('rateOverlay').classList.add('open');
+}
+
+function closeRate(){ document.getElementById('rateOverlay').classList.remove('open'); }
+
+function toggleList(val){
+  selectedList = (selectedList===val||val==='none') ? null : val;
+  updateListBtns();
+}
+function updateListBtns(){
+  ['watched','watching','later'].forEach(l=>{
+    const b=document.getElementById('lb'+l.charAt(0).toUpperCase()+l.slice(1));
+    b.className='list-btn'+(selectedList===l?' '+listColors[l]:'');
+  });
+}
+
+function setStar(v){ selectedStar=v; updateStars(v);
+  const h=document.getElementById('starHint');
+  h.textContent=hints[v]||'';
+  h.style.color=v>=4?'var(--gold)':v===3?'var(--green)':'var(--red)';
+}
+function updateStars(v){ document.querySelectorAll('.star').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.v)<=v)); }
+
+async function submitRating(){
+  if(!selectedStar&&!selectedList){ showToast('⚠️ قيّم أو أضف لقائمة أولاً'); return; }
+  const key=getKey(currentItem);
+  const title=currentItem.title||currentItem.name||'—';
+  const imgSrc=getImg(currentItem);
+  const year=(currentItem.release_date||currentItem.first_air_date||currentItem.released||'').slice(0,4);
+  const payload={
+    device_id:deviceId, item_key:key,
+    stars:selectedStar||null,
+    review:document.getElementById('reviewText').value.trim()||null,
+    list_status:selectedList||null,
+    title, type:currentItem.media_type,
+    poster:imgSrc||null, year,
+  };
+  try{
+    const {error}=await db.from('ratings').upsert(payload,{onConflict:'device_id,item_key'});
+    if(error) throw error;
+    myRatings[key]=payload;
+    await loadCommunityRatings();
+    closeRate(); renderCards(); updateSidebar(); updateHeroStats();
+    showToast(`✅ تم حفظ "${title}"!`);
+  }catch(e){ showToast('❌ تعذّر الحفظ: '+e.message); }
+}
+
+async function deleteRating(){
+  const key=getKey(currentItem);
+  try{
+    await db.from('ratings').delete().eq('device_id',deviceId).eq('item_key',key);
+    delete myRatings[key];
+    await loadCommunityRatings();
+    closeRate(); renderCards(); updateSidebar(); updateHeroStats();
+    showToast('🗑️ تم الحذف');
+  }catch(e){ showToast('❌ '+e.message); }
+}
+
+// ── ADD MODAL ──
+function openAddModal(){ document.getElementById('addOverlay').classList.add('open'); }
+function closeAdd(){ document.getElementById('addOverlay').classList.remove('open'); }
+
+async function submitAdd(){
+  const name=document.getElementById('addName').value.trim();
+  const type=document.getElementById('addType').value;
+  const year=document.getElementById('addYear').value||'2025';
+  const emoji=document.getElementById('addEmoji').value.trim()||'🎭';
+  const overview=document.getElementById('addOverview').value.trim();
+  if(!name){ showToast('⚠️ أدخل اسم العمل'); return; }
+  const fakeId='custom_'+Date.now();
+  const item={ id:fakeId, title:name, name, media_type:type,
+    poster_path:null, background_image:null, _emoji:emoji,
+    vote_average:0, release_date:year, overview, };
+  currentItems.unshift(item);
+  closeAdd();
+  document.getElementById('addName').value='';
+  document.getElementById('addEmoji').value='';
+  document.getElementById('addOverview').value='';
+  renderCards();
+  showToast(`✨ تمت إضافة "${name}"!`);
+}
+
+// ── MY LIST VIEW ──
+function showMyList(){
+  document.getElementById('listOverlay').classList.add('open');
+  renderMyListView();
+}
+function closeListView(){ document.getElementById('listOverlay').classList.remove('open'); }
+function filterMyList(f, el){
+  myListFilter=f;
+  document.querySelectorAll('#listOverlay .btn').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderMyListView();
+}
+function renderMyListView(){
+  const all=Object.values(myRatings);
+  const filtered=myListFilter==='all'?all:all.filter(r=>r.list_status===myListFilter);
+  const el=document.getElementById('myListContent');
+  if(!filtered.length){ el.innerHTML='<div style="text-align:center;color:var(--muted);padding:2rem;font-size:0.85rem;">لا يوجد عناصر</div>'; return; }
+  el.innerHTML=filtered.map(r=>{
+    const imgSrc=r.poster?(r.poster.startsWith('http')?r.poster:IMG+r.poster):null;
+    const listBadge=r.list_status?`<span style="font-size:0.68rem;padding:2px 6px;border-radius:5px;background:rgba(245,200,66,0.1);color:var(--gold);">${r.list_status==='watched'?'✅ شاهدت':r.list_status==='watching'?'▶️ أشاهد':'🔖 لاحقاً'}</span>`:'';
+    return `
+    <div class="list-item" onclick="closeListView();openRate('${r.item_key}')">
+      <div class="list-thumb">${imgSrc?`<img src="${imgSrc}" loading="lazy">`:`<div class="te">${r.type==='game'?'🎮':r.type==='tv'?'📺':'🎬'}</div>`}</div>
+      <div class="list-info">
+        <div class="list-name">${r.title||'—'}</div>
+        <div class="list-sub">${typeLabel[r.type]||''} ${r.year?'• '+r.year:''} ${listBadge}</div>
+      </div>
+      <div class="list-score">
+        ${r.stars?`<div class="list-sc">${'★'.repeat(r.stars)}</div>`:'' }
+        <div class="list-vc">${r.stars?r.stars+'/5':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── SIDEBAR ──
+function updateSidebar(){
+  const all=Object.values(myRatings);
+  document.getElementById('sWatched').textContent=all.filter(r=>r.list_status==='watched').length;
+  document.getElementById('sWatching').textContent=all.filter(r=>r.list_status==='watching').length;
+  document.getElementById('sLater').textContent=all.filter(r=>r.list_status==='later').length;
+  const rated=all.filter(r=>r.stars);
+  const avg=rated.length?(rated.reduce((a,b)=>a+b.stars,0)/rated.length).toFixed(1):'—';
+  document.getElementById('sAvg').textContent=avg;
+
+  // my top ratings
+  const sorted=rated.sort((a,b)=>b.stars-a.stars).slice(0,6);
+  const el=document.getElementById('myRatingsList');
+  if(!sorted.length){ el.innerHTML='<div style="font-size:0.78rem;color:var(--muted);text-align:center;padding:0.8rem;">لم تقيّم أي عمل بعد</div>'; return; }
+  const rc=['g','s','b'];
+  el.innerHTML=sorted.map((r,i)=>{
+    const imgSrc=r.poster?(r.poster.startsWith('http')?r.poster:IMG+r.poster):null;
+    return `
+    <div class="list-item" onclick="openRate('${r.item_key}')">
+      <div class="list-rank ${rc[i]||''}">${i+1}</div>
+      <div class="list-thumb">${imgSrc?`<img src="${imgSrc}" loading="lazy">`:`<div class="te">${r.type==='game'?'🎮':r.type==='tv'?'📺':'🎬'}</div>`}</div>
+      <div class="list-info"><div class="list-name">${r.title||'—'}</div><div class="list-sub">${typeLabel[r.type]||''}</div></div>
+      <div class="list-score"><div class="list-sc" style="font-size:0.85rem;">${'★'.repeat(r.stars)}</div><div class="list-vc">${r.stars}/5</div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderCommunityTop(){
+  const top=Object.entries(communityRatings)
+    .filter(([k,v])=>v.count>=1)
+    .sort((a,b)=>parseFloat(b[1].avg)-parseFloat(a[1].avg))
+    .slice(0,5);
+  const el=document.getElementById('communityTop');
+  if(!top.length){ el.innerHTML='<div style="font-size:0.78rem;color:var(--muted);text-align:center;padding:0.8rem;">لا يوجد تقييمات بعد</div>'; return; }
+  const rc=['g','s','b'];
+  el.innerHTML=top.map(([key,v],i)=>{
+    const r=myRatings[key];
+    const imgSrc=r?.poster?(r.poster.startsWith('http')?r.poster:IMG+r.poster):null;
+    const title=r?.title||key;
+    const type=r?.type||key.split('_')[0];
+    return `
+    <div class="list-item">
+      <div class="list-rank ${rc[i]||''}">${i+1}</div>
+      <div class="list-thumb">${imgSrc?`<img src="${imgSrc}" loading="lazy">`:`<div class="te">${type==='game'?'🎮':type==='tv'?'📺':'🎬'}</div>`}</div>
+      <div class="list-info"><div class="list-name">${title}</div><div class="list-sub">${v.count} تقييم</div></div>
+      <div class="list-score"><div class="list-sc">★ ${v.avg}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function updateHeroStats(){
+  const all=Object.values(myRatings);
+  document.getElementById('statMine').textContent=all.filter(r=>r.stars).length;
+  document.getElementById('statList').textContent=all.filter(r=>r.list_status&&r.list_status!=='none').length;
+}
+
+async function updateTotalStats(){
+  try{
+    const {count}=await db.from('ratings').select('*',{count:'exact',head:true}).not('stars','is',null);
+    document.getElementById('statTotal').textContent=(count||0).toLocaleString('ar');
+  }catch(e){}
+}
+
+// ── TOAST ──
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// close on bg click
+['rateOverlay','addOverlay','listOverlay'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',e=>{ if(e.target.id===id) document.getElementById(id).classList.remove('open'); });
+});
+
+
+// ── AUTH ──
+let currentUser = null;
+
+async function checkAuth(){
+  // Listen to auth state changes first
+  db.auth.onAuthStateChange(async (event, session) => {
+    if(session?.user){
+      currentUser = session.user;
+      deviceId = 'user_' + currentUser.id;
+      updateAuthUI();
+      await loadMyRatings();
+      renderCards();
+      updateSidebar();
+      updateHeroStats();
+      if(event === 'SIGNED_IN'){
+        const name = currentUser.user_metadata?.full_name || currentUser.email || '';
+        showToast('👋 مرحباً ' + name + '!');
+        // Clean URL
+        if(window.location.hash) history.replaceState(null, '', window.location.pathname);
+      }
+    } else if(event === 'SIGNED_OUT'){
+      currentUser = null;
+      deviceId = localStorage.getItem('kino_device') || ('u_'+Math.random().toString(36).slice(2)+Date.now());
+      localStorage.setItem('kino_device', deviceId);
+      myRatings = {};
+      updateAuthUI();
+      renderCards();
+      updateSidebar();
+      updateHeroStats();
+    }
+  });
+
+  // Check existing session
+  const { data: { session } } = await db.auth.getSession();
+  if(session?.user){
+    currentUser = session.user;
+    deviceId = 'user_' + currentUser.id;
+    updateAuthUI();
+    await loadMyRatings();
+  }
+}
+
+function updateAuthUI(){
+  const area = document.getElementById('authArea');
+  if(currentUser){
+    const name = currentUser.user_metadata?.full_name || currentUser.email || 'مستخدم';
+    const avatar = currentUser.user_metadata?.avatar_url;
+    const initial = name.charAt(0).toUpperCase();
+    area.innerHTML = `
+      <div class="user-menu-wrap">
+        <div class="${avatar?'':'user-initial'}" onclick="toggleUserMenu()" style="${avatar?'width:30px;height:30px;border-radius:50%;overflow:hidden;cursor:pointer;border:2px solid var(--gold);':''}">
+          ${avatar?`<img src="${avatar}" style="width:100%;height:100%;object-fit:cover;">`:initial}
+        </div>
+        <div class="user-menu" id="userMenu" style="display:none;">
+          <div class="user-menu-name">${name}</div>
+          <div class="user-menu-item" onclick="showMyList();toggleUserMenu()">📋 قائمتي</div>
+          <div class="user-menu-item danger" onclick="logout()">🚪 خروج</div>
+        </div>
+      </div>`;
+  } else {
+    area.innerHTML = `<button class="auth-btn" id="loginBtn" onclick="openAuth()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      دخول
+    </button>`;
+  }
+  // update mobile bottom nav
+  const mobLabel = document.getElementById('mobAuthLabel');
+  if(mobLabel){
+    if(currentUser){
+      const name = currentUser.user_metadata?.full_name || currentUser.email || '';
+      mobLabel.textContent = name.split(' ')[0] || 'حسابي';
+      document.getElementById('mobAuthBtn').querySelector('span').textContent = '😊';
+    } else {
+      mobLabel.textContent = 'دخول';
+      document.getElementById('mobAuthBtn').querySelector('span').textContent = '👤';
+    }
+  }
+}
+
+function toggleUserMenu(){
+  const m = document.getElementById('userMenu');
+  if(m) m.style.display = m.style.display==='none'?'block':'none';
+}
+
+document.addEventListener('click', e=>{
+  const menu = document.getElementById('userMenu');
+  if(menu && !e.target.closest('.user-menu-wrap')) menu.style.display='none';
+});
+
+function openAuth(){ document.getElementById('authOverlay').classList.add('open'); }
+function closeAuth(){ document.getElementById('authOverlay').classList.remove('open'); }
+
+async function loginWithGoogle(){
+  const siteUrl = window.location.origin;
+  const { error } = await db.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: siteUrl }
+  });
+  if(error) showToast('❌ '+error.message);
+  closeAuth();
+}
+
+async function logout(){
+  await db.auth.signOut();
+  myRatings = {};
+  renderCards();
+  updateSidebar();
+  updateHeroStats();
+  showToast('👋 تم الخروج');
+}
+
+
+function handleMobAuth(){
+  if(currentUser){
+    // show simple menu
+    const name = currentUser.user_metadata?.full_name || currentUser.email || 'مستخدم';
+    if(confirm('مرحباً ' + name + '\nهل تريد تسجيل الخروج؟')) logout();
+  } else {
+    openAuth();
+  }
+}
+
+// ── BOOT ──
+checkAuth();
+initDB();
+updateTotalStats();
+setInterval(updateTotalStats, 30000);
+</script>
+</body>
+</html>
