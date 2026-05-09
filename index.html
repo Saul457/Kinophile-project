@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kinophile Project — قيّم عالمك</title>
+<title>Kinophile — قيّم عالمك</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -21,11 +21,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 
 /* NAV */
 nav{position:sticky;top:0;z-index:100;background:rgba(7,9,15,0.92);backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--border);padding:0 1rem;display:flex;align-items:center;gap:0.6rem;height:60px;}
-@media(max-width:600px){.nav-tabs{display:none!important;}.search-input{width:130px!important;}}
+  border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;gap:1rem;height:60px;}
 .logo{font-family:'Bebas Neue',cursive;font-size:1.7rem;letter-spacing:3px;
   background:linear-gradient(135deg,var(--gold),#fffbe0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex-shrink:0;cursor:pointer;}
-.nav-tabs{display:flex;gap:2px;flex:1;justify-content:center;flex-wrap:wrap;overflow-x:auto;}
+.nav-tabs{display:flex;gap:2px;flex:1;justify-content:center;flex-wrap:wrap;}
 .nav-tab{background:none;border:none;color:var(--muted);font-family:'Cairo',sans-serif;font-size:0.85rem;font-weight:600;
   padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:0.3rem;}
 .nav-tab:hover{color:var(--text);background:rgba(255,255,255,0.05);}
@@ -36,46 +35,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,15,0.92);backdrop-filt
   font-size:0.83rem;width:200px;outline:none;transition:all 0.2s;}
 .search-input:focus{border-color:rgba(245,200,66,0.4);width:240px;}
 .search-icon{position:absolute;left:0.6rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.8rem;pointer-events:none;}
-
-/* AUTH */
-.auth-btn{display:flex;align-items:center;gap:0.4rem;background:var(--surface);border:1px solid var(--border);
-  color:var(--text);font-family:'Cairo',sans-serif;font-size:0.8rem;font-weight:600;
-  padding:0.4rem 0.9rem;border-radius:9px;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
-.auth-btn:hover{border-color:rgba(245,200,66,0.3);color:var(--gold);}
-.auth-btn img{width:16px;height:16px;border-radius:50%;}
-.user-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);cursor:pointer;}
-.user-initial{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));
-  color:#1a0f00;font-weight:700;font-size:0.8rem;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;flex-shrink:0;border:2px solid var(--gold);}
-.auth-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.88);
-  backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:1rem;}
-.auth-overlay.open{display:flex;}
-.auth-modal{background:var(--surface);border:1px solid rgba(245,200,66,0.2);border-radius:20px;
-  padding:2rem;width:100%;max-width:360px;text-align:center;
-  animation:popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;}
-.auth-logo{font-family:'Bebas Neue',cursive;font-size:2.5rem;letter-spacing:3px;
-  background:linear-gradient(135deg,var(--gold),#fffbe0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.3rem;}
-.auth-sub{color:var(--muted);font-size:0.85rem;margin-bottom:1.8rem;}
-.google-btn{display:flex;align-items:center;justify-content:center;gap:0.7rem;
-  width:100%;background:white;color:#333;border:none;border-radius:12px;
-  padding:0.8rem;font-family:'Cairo',sans-serif;font-size:0.92rem;font-weight:700;
-  cursor:pointer;transition:all 0.2s;margin-bottom:0.8rem;}
-.google-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,255,255,0.15);}
-.google-btn svg{width:20px;height:20px;flex-shrink:0;}
-.auth-divider{color:var(--muted);font-size:0.75rem;margin:0.5rem 0;}
-.skip-btn{background:none;border:1px solid var(--border);color:var(--muted);
-  font-family:'Cairo',sans-serif;font-size:0.82rem;width:100%;padding:0.65rem;
-  border-radius:10px;cursor:pointer;transition:all 0.2s;}
-.skip-btn:hover{color:var(--text);}
-.user-menu{position:absolute;top:55px;left:1rem;background:var(--surface);
-  border:1px solid var(--border);border-radius:12px;padding:0.5rem;
-  min-width:180px;z-index:200;box-shadow:0 10px 40px rgba(0,0,0,0.5);
-  animation:fadeDown 0.2s ease both;}
-.user-menu-item{display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.8rem;
-  border-radius:8px;cursor:pointer;font-size:0.82rem;transition:background 0.15s;}
-.user-menu-item:hover{background:var(--surface2);}
-.user-menu-item.danger{color:var(--red);}
-.user-name{font-size:0.78rem;color:var(--muted);padding:0.4rem 0.8rem 0.2rem;}
 
 /* HERO */
 .hero{position:relative;z-index:1;padding:3.5rem 1.5rem 2rem;text-align:center;}
@@ -258,50 +217,12 @@ select.field{width:100%;background:var(--surface2);border:1px solid var(--border
 ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:3px;}
 .divider{height:1px;background:var(--border);margin:0.8rem 0;}
-/* AUTH */
-.auth-btn{display:flex;align-items:center;gap:0.4rem;background:var(--surface);border:1px solid var(--border);
-  color:var(--text);font-family:'Cairo',sans-serif;font-size:0.8rem;font-weight:600;
-  padding:0.4rem 0.9rem;border-radius:9px;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
-.auth-btn:hover{border-color:rgba(245,200,66,0.3);color:var(--gold);}
-.user-initial{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));
-  color:#1a0f00;font-weight:700;font-size:0.82rem;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;flex-shrink:0;border:2px solid var(--gold);}
-.auth-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.88);
-  backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:1rem;}
-.auth-overlay.open{display:flex;}
-.auth-modal{background:var(--surface);border:1px solid rgba(245,200,66,0.2);border-radius:20px;
-  padding:2rem;width:100%;max-width:340px;text-align:center;
-  animation:popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;}
-.auth-logo{font-family:'Bebas Neue',cursive;font-size:2.5rem;letter-spacing:3px;
-  background:linear-gradient(135deg,var(--gold),#fffbe0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.3rem;}
-.auth-sub{color:var(--muted);font-size:0.83rem;margin-bottom:1.8rem;line-height:1.6;}
-.google-btn{display:flex;align-items:center;justify-content:center;gap:0.7rem;
-  width:100%;background:white;color:#333;border:none;border-radius:12px;
-  padding:0.8rem;font-family:'Cairo',sans-serif;font-size:0.9rem;font-weight:700;
-  cursor:pointer;transition:all 0.2s;margin-bottom:0.8rem;}
-.google-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,255,255,0.15);}
-.auth-divider{color:var(--muted);font-size:0.75rem;margin:0.5rem 0;}
-.skip-btn{background:none;border:1px solid var(--border);color:var(--muted);
-  font-family:'Cairo',sans-serif;font-size:0.82rem;width:100%;padding:0.65rem;
-  border-radius:10px;cursor:pointer;transition:all 0.2s;}
-.skip-btn:hover{color:var(--text);}
-.user-menu-wrap{position:relative;flex-shrink:0;}
-.user-menu{position:absolute;top:40px;left:0;background:var(--surface);
-  border:1px solid var(--border);border-radius:12px;padding:0.5rem;
-  min-width:180px;z-index:200;box-shadow:0 10px 40px rgba(0,0,0,0.5);
-  animation:fadeDown 0.2s ease both;}
-.user-menu-name{font-size:0.75rem;color:var(--muted);padding:0.3rem 0.8rem 0.5rem;}
-.user-menu-item{display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0.8rem;
-  border-radius:8px;cursor:pointer;font-size:0.82rem;transition:background 0.15s;}
-.user-menu-item:hover{background:var(--surface2);}
-.user-menu-item.danger{color:var(--red);}
-
 </style>
 </head>
 <body>
 
 <nav>
-  <div class="logo" onclick="setTab('movie', document.querySelector('.nav-tab'))">Kinophile Project</div>
+  <div class="logo" onclick="setTab('movie', document.querySelector('.nav-tab'))">Kinophile</div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="setTab('movie',this)">🎬 أفلام</button>
     <button class="nav-tab" onclick="setTab('tv',this)">📺 مسلسلات</button>
@@ -312,30 +233,10 @@ select.field{width:100%;background:var(--surface2);border:1px solid var(--border
     <span class="search-icon">🔍</span>
     <input class="search-input" id="searchInput" placeholder="ابحث..." oninput="handleSearch(this.value)">
   </div>
-  <div id="authArea" style="flex-shrink:0;">
-    <button class="auth-btn" id="loginBtn" onclick="openAuth()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      دخول
-    </button>
-  </div>
 </nav>
 
-<!-- AUTH MODAL -->
-<div class="auth-overlay" id="authOverlay">
-  <div class="auth-modal">
-    <div class="auth-logo">Kinophile Project</div>
-    <div class="auth-sub">سجّل دخولك لحفظ تقييماتك على جميع أجهزتك</div>
-    <button class="google-btn" onclick="loginWithGoogle()">
-      <svg viewBox="0 0 24 24" width="20" height="20" style="flex-shrink:0"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-      تسجيل الدخول بـ Google
-    </button>
-    <div class="auth-divider">أو</div>
-    <button class="skip-btn" onclick="closeAuth()">تصفح بدون تسجيل</button>
-  </div>
-</div>
-
 <div class="hero">
-  <div class="hero-tag">✨ Kinophile Project — منصة التقييم</div>
+  <div class="hero-tag">✨ Kinophile — منصة التقييم</div>
   <h1>قيّم <em>عالمك</em><br>الترفيهي</h1>
   <p>أفلام، مسلسلات، وألعاب — تقييمات حقيقية يشوفها الجميع</p>
   <div class="stats-bar">
@@ -489,34 +390,6 @@ select.field{width:100%;background:var(--surface2);border:1px solid var(--border
 </div>
 
 <div class="toast" id="toast"></div>
-
-<!-- MOBILE BOTTOM NAV -->
-<div style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(7,9,15,0.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:0.5rem 0;" id="mobileNav">
-  <div style="display:flex;justify-content:space-around;">
-    <button onclick="setTab('movie',this)" style="background:none;border:none;color:var(--muted);font-family:'Cairo',sans-serif;font-size:0.7rem;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:0.3rem 1rem;" class="mob-tab active-mob">
-      <span style="font-size:1.3rem;">🎬</span>أفلام
-    </button>
-    <button onclick="setTab('tv',this)" style="background:none;border:none;color:var(--muted);font-family:'Cairo',sans-serif;font-size:0.7rem;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:0.3rem 1rem;" class="mob-tab">
-      <span style="font-size:1.3rem;">📺</span>مسلسلات
-    </button>
-    <button onclick="setTab('game',this)" style="background:none;border:none;color:var(--muted);font-family:'Cairo',sans-serif;font-size:0.7rem;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:0.3rem 1rem;" class="mob-tab">
-      <span style="font-size:1.3rem;">🎮</span>ألعاب
-    </button>
-    <button onclick="showMyList()" style="background:none;border:none;color:var(--muted);font-family:'Cairo',sans-serif;font-size:0.7rem;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:0.3rem 1rem;">
-      <span style="font-size:1.3rem;">📋</span>قائمتي
-    </button>
-    <button onclick="openAuth()" id="mobLoginBtn" style="background:none;border:none;color:var(--muted);font-family:'Cairo',sans-serif;font-size:0.7rem;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:0.3rem 1rem;">
-      <span style="font-size:1.3rem;">👤</span>دخول
-    </button>
-  </div>
-</div>
-<style>
-@media(max-width:600px){
-  #mobileNav{display:block!important;}
-  body{padding-bottom:70px;}
-  .layout{grid-template-columns:1fr!important;}
-}
-</style>
 
 <script>
 // ── CONFIG ──
@@ -998,91 +871,7 @@ function showToast(msg){
   document.getElementById(id).addEventListener('click',e=>{ if(e.target.id===id) document.getElementById(id).classList.remove('open'); });
 });
 
-
-// ── AUTH ──
-let currentUser = null;
-
-async function checkAuth(){
-  const { data: { session } } = await db.auth.getSession();
-  if(session?.user){
-    currentUser = session.user;
-    deviceId = 'user_' + currentUser.id;
-    updateAuthUI();
-  }
-  db.auth.onAuthStateChange((event, session) => {
-    if(session?.user){
-      currentUser = session.user;
-      deviceId = 'user_' + currentUser.id;
-      updateAuthUI();
-      loadMyRatings();
-    } else {
-      currentUser = null;
-      deviceId = localStorage.getItem('kino_device') || ('u_'+Math.random().toString(36).slice(2)+Date.now());
-      localStorage.setItem('kino_device', deviceId);
-      updateAuthUI();
-    }
-  });
-}
-
-function updateAuthUI(){
-  const area = document.getElementById('authArea');
-  if(currentUser){
-    const name = currentUser.user_metadata?.full_name || currentUser.email || 'مستخدم';
-    const avatar = currentUser.user_metadata?.avatar_url;
-    const initial = name.charAt(0).toUpperCase();
-    area.innerHTML = `
-      <div class="user-menu-wrap">
-        <div class="${avatar?'':'user-initial'}" onclick="toggleUserMenu()" style="${avatar?'width:30px;height:30px;border-radius:50%;overflow:hidden;cursor:pointer;border:2px solid var(--gold);':''}">
-          ${avatar?`<img src="${avatar}" style="width:100%;height:100%;object-fit:cover;">`:initial}
-        </div>
-        <div class="user-menu" id="userMenu" style="display:none;">
-          <div class="user-menu-name">${name}</div>
-          <div class="user-menu-item" onclick="showMyList();toggleUserMenu()">📋 قائمتي</div>
-          <div class="user-menu-item danger" onclick="logout()">🚪 خروج</div>
-        </div>
-      </div>`;
-  } else {
-    area.innerHTML = `<button class="auth-btn" id="loginBtn" onclick="openAuth()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      دخول
-    </button>`;
-  }
-}
-
-function toggleUserMenu(){
-  const m = document.getElementById('userMenu');
-  if(m) m.style.display = m.style.display==='none'?'block':'none';
-}
-
-document.addEventListener('click', e=>{
-  const menu = document.getElementById('userMenu');
-  if(menu && !e.target.closest('.user-menu-wrap')) menu.style.display='none';
-});
-
-function openAuth(){ document.getElementById('authOverlay').classList.add('open'); }
-function closeAuth(){ document.getElementById('authOverlay').classList.remove('open'); }
-
-async function loginWithGoogle(){
-  const siteUrl = window.location.origin;
-  const { error } = await db.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: siteUrl }
-  });
-  if(error) showToast('❌ '+error.message);
-  closeAuth();
-}
-
-async function logout(){
-  await db.auth.signOut();
-  myRatings = {};
-  renderCards();
-  updateSidebar();
-  updateHeroStats();
-  showToast('👋 تم الخروج');
-}
-
 // ── BOOT ──
-checkAuth();
 initDB();
 updateTotalStats();
 setInterval(updateTotalStats, 30000);
